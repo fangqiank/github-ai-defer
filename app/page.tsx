@@ -5,6 +5,8 @@ import { useMutation, useQuery } from "react-query";
 export default function Home() {
   const [userName, setUserName] = useState<string>("");
 
+  const [executionId, setExecutionId] = useState<string | null>()
+
   const {mutate} = useMutation(async () => {
     const req = await fetch(`/api/githubProfile/${userName}`, {
       method: 'POST'
@@ -12,13 +14,25 @@ export default function Home() {
 
     return await req.json()
   }, {
-    onSuccess: data => console.log(data)
+    onSuccess: ({id}) => setExecutionId(id)
   }) 
 
-  const data = {
-    state: "",
-    result: null,
-  };
+  const {data} = useQuery(
+    'jobStatus',
+    async () => {
+      const req = await fetch(`/api/githubProfile/${executionId}`, {})
+
+      return await req.json()
+    }, {
+      enabled: !!executionId,
+      refetchInterval: 1000,
+      onSuccess: data => {
+        if(data.result || data.state === 'cancelled'){
+          setExecutionId(null)
+        }
+      }
+    }
+  )
 
   const hasStarted = data?.state === "started" || data?.state === "created";
 
