@@ -6,7 +6,7 @@ export async function POST(
   { params }: { params: { usernameOrExecId: string } }
 ) {
   const res = await generateGithubProfile(params.usernameOrExecId)
-  return NextResponse.json(res);
+  return NextResponse.json(res)
 }
 
 export async function GET(
